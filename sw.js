@@ -1,4 +1,4 @@
-const cacheName = 'utv-v5-earning';
+const cacheName = 'utv-movie-hub-v2';
 const assets = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
