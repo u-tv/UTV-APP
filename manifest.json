@@ -1,6 +1,6 @@
 {
-  "name": "U-TV Premium",
-  "short_name": "U-TV",
+  "name": "UTV MOVIE HUB",
+  "short_name": "UTV HUB",
   "description": "Fast Movie & Series Streaming App",
   "start_url": "index.html",
   "display": "standalone",
