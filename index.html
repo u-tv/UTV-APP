@@ -3,108 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>U-TV Movies - Premium App</title>
-    
-    <!-- PWA MANIFEST -->
+    <title>UTV Movies</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#05070a">
-    
+    <meta name="theme-color" content="#ff4f00">
     <style>
-        :root { --brand: #ff4f00; --bg: #05070a; --card: #12141b; }
-        * { -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: var(--bg); color: #fff; 
-            font-family: system-ui, sans-serif; 
-            margin:0; overflow-x: hidden;
-        }
-        
-        /* 3D INSTALL BANNER */
-        #installBanner {
-            display: none;
-            position: fixed;
-            bottom: 120px;
-            left: 5%;
-            right: 5%;
-            background: linear-gradient(135deg, #ff4f00, #ff8c00);
-            padding: 25px;
-            border-radius: 25px;
-            z-index: 9999;
-            box-shadow: 0 20px 40px rgba(255,79,0,0.4);
-            border: 3px solid rgba(255,255,255,0.3);
-            text-align: center;
-            transform: perspective(1000px) rotateX(10deg);
-            animation: slideUp3D 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        @keyframes slideUp3D {
-            0% { transform: translateY(120px) perspective(1000px) rotateX(30deg); opacity: 0; }
-            100% { transform: translateY(0) perspective(1000px) rotateX(10deg); opacity: 1; }
-        }
-        #installBtn {
-            background: #fff;
-            color: #ff4f00 !important;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        #installBtn:active { transform: scale(0.95) translateY(2px); }
-        
-        /* APP UI */
-        .glass-nav { background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); position: fixed; top:0; width:100%; z-index:100; padding:12px 20px; }
-        .movie-card { border-radius:12px; background:var(--card); aspect-ratio:2/3; border:1px solid rgba(255,255,255,0.05); overflow:hidden; cursor:pointer; position:relative; }
-        .movie-card:active { transform: scale(0.95); }
-        .bottom-bar { position:fixed; bottom:0; width:100%; background:rgba(8,10,13,0.95); border-top:1px solid #1a1d23; display:flex; justify-content:space-around; padding:12px 0 40px 0; z-index:1000; }
-        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; font-weight:700; padding:5px; }
-        .nav-item.active { color:var(--brand); }
-        #fullPlayer { position:fixed; inset:0; background:#000; z-index:5000; display:none; flex-direction:column; }
-        iframe { width:100%; height:100%; background:#000; border:0; }
-        .no-scrollbar::-webkit-scrollbar { display:none; }
+        :root{--brand:#ff4f00;--bg:#05070a;--card:#12141b;}
+        *{-webkit-tap-highlight-color:transparent;}
+        body{background:var(--bg);color:#fff;font-family:system-ui,sans-serif;margin:0;overflow-x:hidden;}
+        #installBanner{display:none;position:fixed;bottom:120px;left:5%;right:5%;background:linear-gradient(135deg,#ff4f00,#ff8c00);padding:25px;border-radius:25px;z-index:9999;box-shadow:0 20px 40px rgba(255,79,0,0.4);border:3px solid rgba(255,255,255,0.3);text-align:center;transform:perspective(1000px) rotateX(10deg);animation:slideUp3D 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);}
+        @keyframes slideUp3D{0%{transform:translateY(120px) perspective(1000px) rotateX(30deg);opacity:0;}100%{transform:translateY(0) perspective(1000px) rotateX(10deg);opacity:1;}}
+        #installBtn{background:#fff;color:#ff4f00 !important;border:none;padding:15px 40px;border-radius:50px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,0.3);transition:all 0.3s;margin-top:10px;}
+        #installBtn:active{transform:scale(0.95) translateY(2px);}
+        .glass-nav{background:rgba(0,0,0,0.9);backdrop-filter:blur(15px);position:fixed;top:0;width:100%;z-index:100;padding:12px 20px;}
+        .movie-card{border-radius:12px;background:var(--card);aspect-ratio:2/3;border:1px solid rgba(255,255,255,0.05);overflow:hidden;cursor:pointer;position:relative;background-size:cover;background-position:center;}
+        .movie-card:active{transform:scale(0.95);}
+        .bottom-bar{position:fixed;bottom:0;width:100%;background:rgba(8,10,13,0.95);border-top:1px solid #1a1d23;display:flex;justify-content:space-around;padding:12px 0 40px 0;z-index:1000;}
+        .nav-item{display:flex;flex-direction:column;align-items:center;font-size:11px;color:#666;font-weight:700;padding:5px;}
+        .nav-item.active{color:var(--brand);}
+        #fullPlayer{position:fixed;inset:0;background:#000;z-index:5000;display:none;flex-direction:column;}
+        iframe{width:100%;height:100%;background:#000;border:0;}
     </style>
 </head>
 <body>
-
-<!-- 3D INSTALL BANNER -->
 <div id="installBanner">
-    <h3 style="margin:0 0 10px 0; font-size:22px; font-weight:900; color:white;">📱 UTV MOVIES APP INSTALL</h3>
-    <p style="margin:0 0 15px 0; font-size:14px; color:rgba(255,255,255,0.9);">Home screen पर premium movies के लिए</p>
+    <h3 style="margin:0 0 10px 0;font-size:22px;font-weight:900;color:white;">📱 UTV MOVIES INSTALL</h3>
+    <p style="margin:0 0 15px 0;font-size:14px;color:rgba(255,255,255,0.9);">Home screen पर premium movies</p>
     <button id="installBtn">अभी INSTALL करें ➤</button>
 </div>
 
-<!-- APP CONTENT (same ultra-fast code) -->
 <div id="app" style="display:block">
     <header class="glass-nav">
         <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
             <h1 style="margin:0;font-size:24px;font-weight:900;color:var(--brand);cursor:pointer" onclick="loadHome()">U-TV</h1>
             <div style="flex:1;max-width:70%;margin-left:20px;position:relative">
-                <input id="searchInput" placeholder="🔍 Leo hindi / Jawan ta / Naruto jp" 
-                       style="width:100%;padding:12px 45px 12px 15px;border-radius:25px;background:rgba(21,24,31,0.95);color:white;font-size:14px;border:1px solid transparent;box-sizing:border-box"
-                       onkeyup="if(event.key==='Enter')searchMovies()">
+                <input id="searchInput" placeholder="🔍 Leo hindi / Jawan ta" style="width:100%;padding:12px 45px 12px 15px;border-radius:25px;background:rgba(21,24,31,0.95);color:white;font-size:14px;border:1px solid transparent;box-sizing:border-box" onkeyup="if(event.key==='Enter')searchMovies()">
                 <span style="position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#666;font-size:16px">⏎</span>
             </div>
         </div>
     </header>
-
     <main style="padding:80px 15px 120px 15px">
-        <section style="margin-bottom:20px">
-            <div id="hero" style="height:200px;border-radius:20px;background:#1a1d23;position:relative;overflow:hidden"></div>
-        </section>
-        <section>
-            <h2 id="title" style="font-size:16px;font-weight:900;margin:0 0 20px 0;display:flex;align-items:center;gap:8px">
-                <span style="width:4px;height:20px;background:var(--brand)"></span>Popular Worldwide
-            </h2>
-            <div id="movieGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
-            <div id="loader" style="padding:40px;text-align:center">
-                <div style="width:28px;height:28px;border:3px solid var(--brand);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px"></div>
-                <span style="font-size:14px;color:#666">Loading movies...</span>
-            </div>
-        </section>
+        <div id="hero" style="height:200px;border-radius:20px;background:#1a1d23;position:relative;overflow:hidden;margin-bottom:20px"></div>
+        <h2 id="title" style="font-size:16px;font-weight:900;margin:0 0 20px 0;display:flex;align-items:center;gap:8px"><span style="width:4px;height:20px;background:var(--brand)"></span>Popular Worldwide</h2>
+        <div id="movieGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+        <div id="loader" style="padding:40px;text-align:center"><div style="width:28px;height:28px;border:3px solid var(--brand);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px"></div><span style="font-size:14px;color:#666">Loading...</span></div>
     </main>
-
     <nav class="bottom-bar">
         <div class="nav-item active" onclick="loadHome()"><span>🏠</span><span>HOME</span></div>
         <div class="nav-item" onclick="quickSearch('hindi')"><span>🇮🇳</span><span>HINDI</span></div>
@@ -113,51 +55,44 @@
     </nav>
 </div>
 
-<!-- PLAYER -->
 <div id="fullPlayer">
     <div style="padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.95);border-bottom:1px solid rgba(255,255,255,0.1)">
         <button onclick="closePlayer()" style="font-size:30px;color:white;background:none;border:none;cursor:pointer;padding:0">✕</button>
-        <span id="playerTitle" style="font-weight:900;font-size:13px;text-transform:uppercase;white-space:nowrap;overflow:hidden;max-width:60%"></span>
+        <span id="playerTitle" style="font-weight:900;font-size:13px;text-transform:uppercase;max-width:60%"></span>
         <button id="downloadBtn" style="background:var(--brand);color:white;border:none;padding:10px 20px;border-radius:25px;font-size:12px;font-weight:900;cursor:pointer">📥 DOWNLOAD</button>
     </div>
     <div id="serverSelect" style="display:flex;gap:10px;padding:15px;background:rgba(8,10,13,0.95);overflow-x:auto;border-bottom:1px solid rgba(255,255,255,0.05)"></div>
-    <div style="flex:1;background:black">
-        <iframe id="videoFrame" allowfullscreen></iframe>
-    </div>
+    <div style="flex:1;background:black"><iframe id="videoFrame" allowfullscreen></iframe></div>
 </div>
 
 <script>
-/* ULTRA-FAST MOVIE APP */
-let page=1, isLoading=false, isSearching=false, mode='home';
+let page=1,isLoading=false,isSearching=false,mode='home',deferredPrompt;
 const API_KEYS=['174d0214bf933dd59b3d5ec68a0c967f','5bf61a62fd4647aa7debed7d6f2db079'];
 
-// PWA 3D INSTALL
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').style.display = 'block';
-});
+window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').style.display='block';});
+document.getElementById('installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;document.getElementById('installBanner').style.display='none';deferredPrompt=null;}};
+window.addEventListener('appinstalled',()=>{document.getElementById('installBanner').style.display='none';});
 
-document.getElementById('installBtn').onclick = async () => {
-    if(deferredPrompt) {
-        deferredPrompt.prompt();
-        const {outcome} = await deferredPrompt.userChoice;
-        if(outcome === 'accepted') {
-            document.getElementById('installBanner').style.display = 'none';
-            deferredPrompt = null;
-        }
-    }
-};
+async function fetchAPI(endpoint,lang='hi-IN'){for(let key of API_KEYS){try{const res=await fetch(`https://api.themoviedb.org/3${endpoint}?api_key=${key}&language=${lang}`);return await res.json();}catch(e){}}return{results:[]};}
 
-window.addEventListener('appinstalled', () => {
-    document.getElementById('installBanner').style.display = 'none';
-});
+async function loadHome(){mode='home';page=1;document.getElementById('title').innerHTML='<span style="width:4px;height:20px;background:var(--brand)"></span>Popular Worldwide';document.getElementById('movieGrid').innerHTML='';const trending=await fetchAPI('/trending/all/day');if(trending.results?.[0]){const h=trending.results[0];document.getElementById('hero').innerHTML=`<div style="position:absolute;bottom:15px;left:15px;right:15px"><h2 style="margin:0;font-size:22px;font-weight:900;color:white;text-shadow:2px 2px 4px black">${h.title||h.name}</h2></div>`;document.getElementById('hero').style.backgroundImage=`url(https://image.tmdb.org/t/p/w1280${h.backdrop_path})`;}loadMovies();}
 
-// MOVIE FUNCTIONS (same ultra-fast)
-async function fetchAPI(endpoint){/* same code as before */}
-// ... (rest of movie functions remain exactly same)
+async function loadMovies(){if(isLoading||isSearching)return;isLoading=true;document.getElementById('loader').style.display='block';const data=await fetchAPI(`/movie/popular?page=${page}`);document.getElementById('movieGrid').insertAdjacentHTML('beforeend',data.results.map(createMovieCard).join(''));page++;isLoading=false;document.getElementById('loader').style.display='none';}
+
+function createMovieCard(m){const title=(m.title||m.name||'Unknown').replace(/'/g,''),poster=m.poster_path?`https://image.tmdb.org/t/p/w342${m.poster_path}`:`https://via.placeholder.com/342x513/ff4f00/fff?text=?`,type=m.media_type||'movie';return`<div class="movie-card" style="background-image:url(${poster})" onclick="playMovie(${m.id},'${type}','${title}')"><div style="position:absolute;bottom:10px;left:10px;right:10px;color:white;font-size:12px;font-weight:700;text-shadow:1px 1px 2px black;line-height:1.3">${title}</div></div>`;}
+
+window.searchMovies=async function(){const q=document.getElementById('searchInput').value.trim();if(!q||isSearching)return;isSearching=true;mode='search';document.getElementById('title').innerHTML=`<span style="width:4px;height:20px;background:var(--brand)"></span>SEARCH: ${q.toUpperCase()}`;document.getElementById('movieGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666">Searching...</div>';const data=await fetchAPI(`/search/multi?query=${encodeURIComponent(q)}`);document.getElementById('movieGrid').innerHTML=data.results.filter(m=>m.poster_path).map(createMovieCard).join('');isSearching=false;};
+
+window.quickSearch=q=>{document.getElementById('searchInput').value=q;searchMovies();};
+
+window.playMovie=function(id,type,title){document.getElementById('fullPlayer').style.display='flex';document.getElementById('playerTitle').textContent=title;const servers=[`https://vidsrc.to/embed/${type}/${id}`,`https://vidsrc.xyz/embed/${type}/${id}`,`https://2embed.cc/embed/${type}/${id}`];document.getElementById('serverSelect').innerHTML=servers.map((u,i)=>`<button onclick="document.getElementById('videoFrame').src='${u}'" style="background:rgba(26,29,35,0.8);color:white;border:none;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:900;white-space:nowrap;flex-shrink:0;cursor:pointer">${i+1}</button>`).join('');document.getElementById('videoFrame').src=servers[0];document.getElementById('downloadBtn').onclick=()=>window.open(servers[0],'_blank');};
+
+window.closePlayer=function(){document.getElementById('fullPlayer').style.display='none';document.getElementById('videoFrame').src='';};
+window.showHistory=function(){document.getElementById('title').innerHTML='<span style="width:4px;height:20px;background:var(--brand)"></span>History';document.getElementById('movieGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666">No history yet</div>';};
+
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&!isLoading&&mode==='home')loadMovies();},{threshold:0.1}).observe(document.getElementById('loader'));
+setTimeout(loadHome,300);
 </script>
-
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>
