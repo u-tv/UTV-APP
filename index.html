@@ -134,5 +134,42 @@
 
         loadMovies(currentPath);
     </script>
+
+    <script>
+  // Service Worker Register करना
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW Active'))
+        .catch(err => console.log('SW Error', err));
+    });
+  }
+
+  // Install Prompt Logic
+  let deferredPrompt;
+  const installBanner = document.getElementById('install-banner');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // डिफ़ॉल्ट प्रॉम्प्ट को रोकना
+    e.preventDefault();
+    deferredPrompt = e;
+    // हमारा 3D कस्टम बटन दिखाना
+    installBanner.style.display = 'block';
+  });
+
+  document.getElementById('btn-install').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User installed the app');
+      }
+      deferredPrompt = null;
+      installBanner.style.display = 'none';
+    }
+  });
+</script>
+
 </body>
 </html>
+
