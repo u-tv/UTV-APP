@@ -2,106 +2,422 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
+    <title>U-TV Premium - Worldwide Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#05070a">
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <title>U-TV Premium</title>
+
+    <!-- Tailwind + Cloudflare Turnstile -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
     <style>
         :root { --brand: #ff4f00; --bg: #05070a; --card: #12141b; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; margin:0; }
+        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
+        html, body { margin:0; padding:0; height:100%; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+
+        /* Security Gate */
+        #safety-gate { position: fixed; inset: 0; background: #000; z-index: 1000000; display: flex; align-items: center; justify-content: center; }
+        #app-layout { display: none; opacity: 0; transition: 0.5s ease; height:100%; }
+
+        /* MX Player Ad Style */
+        #ad-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000000; align-items: center; justify-content: center; flex-direction: column; }
+        
+        /* App UI Components */
         .glass-nav { background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .movie-card { border-radius: 12px; background: var(--card); overflow: hidden; aspect-ratio: 2/3; position: relative; border: 1px solid rgba(255,255,255,0.03); transition: 0.3s; cursor: pointer; }
+        .movie-card:active { transform: scale(0.92); }
+
+        /* Bottom Menu */
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: #080a0d; border-top: 1px solid #1a1d23; display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #555; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #555; font-weight: 700; }
         .nav-item.active { color: var(--brand); }
+
+        /* Fast Player Overlay */
         #fullPlayer { display: none; position: fixed; inset: 0; background: #000; z-index: 500000; flex-direction: column; }
-        iframe { width: 100%; height: 100%; background: #000; }
+        iframe { width: 100%; height: 100%; background: #000; border:0; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         .shimmer { background: linear-gradient(90deg, #12141b 25%, #1c1f26 50%, #12141b 75%); background-size: 200% 100%; animation: load 1.5s infinite; }
         @keyframes load { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        /* 3D Install Banner */
+        #install-banner {
+            display:none;
+            position:fixed;
+            bottom:100px;
+            left:5%;
+            right:5%;
+            background: linear-gradient(135deg, #ff4f00, #ff8c00);
+            padding: 20px;
+            border-radius: 20px;
+            z-index: 3000000;
+            box-shadow: 0 15px 35px rgba(255,79,0,0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            text-align: center;
+            font-family: inherit;
+            animation: slideIn 0.5s ease-out;
+            transform: perspective(800px) rotateX(8deg);
+        }
+        #btn-install {
+            background: #fff;
+            color: #ff4f00;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        #btn-install:active { transform: scale(0.95); }
+        @keyframes slideIn {
+            from { transform: translateY(100px) perspective(800px) rotateX(25deg); opacity: 0; }
+            to { transform: translateY(0) perspective(800px) rotateX(8deg); opacity: 1; }
+        }
     </style>
 </head>
-<body onload="init()">
+<body>
 
+<!-- SAFETY GATE -->
+<div id="safety-gate">
+    <div class="text-center">
+        <h1 class="text-5xl font-black italic text-orange-600 mb-8 tracking-tighter">U-TV</h1>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAACpYk-c9YeKTSuo1" data-callback="appLaunch"></div>
+        <p class="text-gray-600 text-[10px] mt-6 uppercase tracking-widest">Global Encrypted Access</p>
+    </div>
+</div>
+
+<!-- AD MODAL -->
+<div id="ad-modal">
+    <div class="p-6 bg-[#111] rounded-2xl border border-white/5 w-[85%] text-center shadow-2xl">
+        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4">Sponsor Advertisement</p>
+        <div class="h-40 bg-[#05070a] rounded-xl flex items-center justify-center mb-6">
+            <span class="text-xs text-orange-600 animate-pulse">Establishing Secure Stream...</span>
+        </div>
+        <button id="skipBtn" onclick="closeAd()" class="w-full py-3 bg-gray-800 rounded-full font-bold text-gray-400 pointer-events-none">Wait 5s</button>
+    </div>
+</div>
+
+<!-- MAIN APP LAYOUT -->
+<div id="app-layout">
     <header class="glass-nav fixed top-0 w-full z-[100] px-5 py-4 flex items-center justify-between">
-        <h1 class="text-2xl font-black italic text-orange-600">U-TV</h1>
+        <h1 class="text-2xl font-black italic text-orange-600" onclick="location.reload()">U-TV</h1>
         <div class="flex-1 max-w-[70%] ml-4 relative">
-            <input type="text" id="gSearch" onkeyup="if(event.key==='Enter')globalSearch()" placeholder="Search movies..." class="w-full bg-[#15181f] rounded-full py-2 px-10 text-xs border border-transparent focus:border-orange-600 text-white">
+            <input type="text" id="gSearch" onkeyup="if(event.key==='Enter')globalSearch()" placeholder="Search: movie + language (e.g. Leo hindi)" class="w-full bg-[#15181f] rounded-full py-2 px-10 text-xs border border-transparent focus:border-orange-600 transition-all">
+            <span class="absolute left-4 top-2 text-xs">🔍</span>
         </div>
     </header>
 
     <main class="pt-24 pb-32 px-4">
-        <div id="heroBox" class="h-44 w-full rounded-2xl shimmer mb-8 overflow-hidden"></div>
-        <h2 id="gridTitle" class="text-sm font-black mb-4 uppercase tracking-widest"><span class="w-1 h-4 bg-orange-600 inline-block mr-2"></span> Popular Worldwide</h2>
-        <div id="mainGrid" class="grid grid-cols-3 gap-3"></div>
-        <div id="loadPoint" class="py-12 flex justify-center"><div class="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div></div>
+        <section id="historySec" class="mb-8 hidden">
+            <h2 class="text-sm font-black mb-4 text-orange-500 uppercase tracking-widest">Watch History</h2>
+            <div id="historyGrid" class="flex gap-3 overflow-x-auto no-scrollbar pb-2"></div>
+        </section>
+
+        <section class="mb-8">
+            <div id="heroBox" class="h-44 w-full rounded-2xl shimmer relative overflow-hidden"></div>
+        </section>
+
+        <section>
+            <h2 id="gridTitle" class="text-sm font-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                <span class="w-1 h-4 bg-orange-600"></span> Popular Worldwide
+            </h2>
+            <div id="mainGrid" class="grid grid-cols-3 gap-3"></div>
+            
+            <div id="loadPoint" class="py-12 flex justify-center">
+                <div class="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </section>
     </main>
 
     <nav class="bottom-bar">
         <div class="nav-item active" onclick="location.reload()"><span>🏠</span><span>HOME</span></div>
         <div class="nav-item" onclick="globalSearch('hindi')"><span>🎬</span><span>HINDI</span></div>
         <div class="nav-item" onclick="globalSearch('series')"><span>📺</span><span>SERIES</span></div>
+        <div class="nav-item" onclick="toggleHistory()"><span>🕒</span><span>RECENT</span></div>
     </nav>
+</div>
 
-    <div id="fullPlayer">
-        <div class="p-4 flex items-center justify-between bg-black"><button onclick="exitPlayer()" class="text-2xl">✕</button><span id="pName" class="font-bold text-[10px] uppercase"></span></div>
+<!-- FULL PLAYER -->
+<div id="fullPlayer">
+    <div class="p-4 flex items-center justify-between bg-black border-b border-white/5">
+        <button onclick="exitPlayer()" class="text-2xl">✕</button>
+        <span id="pName" class="font-bold text-[10px] truncate max-w-[60%] tracking-tighter uppercase"></span>
+        <button id="dlBtn" class="bg-orange-600 px-3 py-1 rounded text-[10px] font-black">DOWNLOAD</button>
+    </div>
+    <div id="sSelect" class="flex gap-2 p-3 bg-[#080a0d] overflow-x-auto no-scrollbar border-b border-white/5"></div>
+    <div class="flex-1 bg-black">
         <iframe id="iframePro" allowfullscreen frameborder="0"></iframe>
     </div>
-
-    <div id="install-banner" style="display:none; position:fixed; bottom:100px; left:5%; right:5%; background: linear-gradient(135deg, #ff4f00, #ff8c00); padding: 20px; border-radius: 20px; z-index: 1000000; box-shadow: 0 15px 35px rgba(255,79,0,0.4); text-align: center; border: 2px solid rgba(255,255,255,0.2);">
-        <h3 style="margin:0; font-size:18px; font-weight:900; color:white;">U-TV INSTALL करें!</h3>
-        <p style="margin:5px 0 15px; font-size:12px; color:white; opacity:0.9;">मूवीज़ के लिए असली ऐप इंस्टॉल करें</p>
-        <button id="btn-install" style="background: #fff; color: #ff4f00; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 900; cursor: pointer;">अभी इंस्टॉल करें</button>
+    <div class="p-6 h-1/2 overflow-y-auto bg-[#05070a]">
+        <h2 id="mFullTitle" class="text-xl font-black mb-3"></h2>
+        <p id="mFullDesc" class="text-gray-500 text-xs leading-relaxed"></p>
     </div>
+</div>
 
-    <script>
-        const KEYS = ['174d0214bf933dd59b3d5ec68a0c967f'];
-        let pg = 1;
+<!-- 3D INSTALL POPUP -->
+<div id="install-banner">
+    <h3 style="margin:0; font-size:18px; font-weight:900; color:white;">U-TV INSTALL करें!</h3>
+    <p style="margin:5px 0 15px; font-size:12px; color:white; opacity:0.9;">प्रीमियम मूवीज़ के लिए असली ऐप इंस्टॉल करें (U-TV MOVIE HUB)</p>
+    <button id="btn-install">अभी इंस्टॉल करें</button>
+</div>
 
-        async function api(path) {
-            const r = await fetch(`https://api.themoviedb.org/3${path}${path.includes('?')?'&':'?'}api_key=${KEYS[0]}`);
-            return await r.json();
+<script>
+    // -------------------
+    // TMDB + APP LOGIC
+    // -------------------
+    (function() {
+        const KEYS = ['174d0214bf933dd59b3d5ec68a0c967f', '5bf61a62fd4647aa7debed7d6f2db079'];
+        let kIdx = 0, pg = 1, isSearching = false, adViewed = 0;
+        let currentMode = 'popular'; // "popular" or "search"
+        let lastQuery = '';
+        let lastLang = 'en-US';
+
+        // Verify Bot & Launch
+        window.appLaunch = function(token) {
+            if(token) {
+                document.getElementById('safety-gate').style.display = 'none';
+                const app = document.getElementById('app-layout');
+                app.style.display = 'block';
+                setTimeout(() => app.style.opacity = '1', 50);
+                init();
+            }
+        };
+
+        // MX Player Style Ad
+        function triggerAd(next) {
+            if(adViewed < 2) {
+                const modal = document.getElementById('ad-modal');
+                const btn = document.getElementById('skipBtn');
+                modal.style.display = 'flex';
+                let time = 5;
+                const timer = setInterval(() => {
+                    time--;
+                    btn.innerText = `Wait ${time}s`;
+                    if(time <= 0) {
+                        clearInterval(timer);
+                        btn.innerText = "SKIP AD";
+                        btn.classList.add('bg-white', 'text-black');
+                        btn.classList.remove('text-gray-400');
+                        btn.style.pointerEvents = 'auto';
+                    }
+                }, 1000);
+                window.closeAd = () => {
+                    modal.style.display = 'none';
+                    adViewed++;
+                    next();
+                    // Background Ad Load
+                    window.open('https://www.effectivegatecpm.com/sa8mca36sv?key=3711015d24018cf89ccb362976c4a2e0', '_blank');
+                };
+            } else { next(); }
+        }
+
+        async function api(path, langParam = '') {
+            const lang = langParam || lastLang || 'en-US';
+            const url = `https://api.themoviedb.org/3${path}${path.includes('?')?'&':'?'}api_key=${KEYS[kIdx]}&include_adult=false&language=${encodeURIComponent(lang)}`;
+            try {
+                const r = await fetch(url);
+                return await r.json();
+            } catch {
+                kIdx = (kIdx + 1) % KEYS.length;
+                return api(path, langParam);
+            }
         }
 
         async function init() {
+            // Hero: trending all day
             const tr = await api('/trending/all/day');
-            const h = tr.results[0];
-            document.getElementById('heroBox').innerHTML = `<img src="https://image.tmdb.org/t/p/original${h.backdrop_path}" class="w-full h-full object-cover">`;
-            loadGrid();
+            const h = tr.results && tr.results[0];
+            if(h) {
+                document.getElementById('heroBox').innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/original${h.backdrop_path}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute bottom-4 left-4"><h2 class="text-xl font-black italic uppercase">${h.title||h.name}</h2></div>
+                `;
+            } else {
+                document.getElementById('heroBox').classList.remove('shimmer');
+                document.getElementById('heroBox').innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No Data</div>';
+            }
+
+            loadGrid(); // popular
+            renderHistory();
+            
+            const obs = new IntersectionObserver(e => { 
+                if(e[0].isIntersecting) {
+                    if(currentMode === 'popular') {
+                        loadGrid();
+                    } else if(currentMode === 'search' && lastQuery) {
+                        loadMoreSearch();
+                    }
+                }
+            }, {threshold:0.1});
+            obs.observe(document.getElementById('loadPoint'));
         }
 
         async function loadGrid() {
-            const d = await api(`/movie/popular?page=${pg}`);
-            document.getElementById('mainGrid').innerHTML += d.results.map(m => `
-                <div class="movie-card" onclick="playMedia('${m.id}', 'movie', '${(m.title||m.name).replace(/'/g,"")}')">
-                    <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" class="w-full h-full object-cover">
-                </div>
-            `).join('');
-            pg++;
+            if(isSearching) return;
+            isSearching = true;
+            currentMode = 'popular';
+            const d = await api(`/movie/popular?page=${pg}`, lastLang);
+            if(d.results) {
+                document.getElementById('mainGrid').innerHTML += d.results.map(m => createCard(m)).join('');
+                pg++;
+            }
+            isSearching = false;
         }
 
-        window.playMedia = function(id, type, title) {
-            document.getElementById('fullPlayer').style.display = 'flex';
-            document.getElementById('pName').innerText = title;
-            document.getElementById('iframePro').src = `https://vidsrc.to/embed/${type}/${id}`;
+        function createCard(m, small = false) {
+            const title = (m.title||m.name||'').replace(/'/g,"");
+            const poster = m.poster_path ? `https://image.tmdb.org/t/p/w300${m.poster_path}` : 'https://via.placeholder.com/300x450?text=NO+IMAGE';
+            const desc = (m.overview||"").replace(/'/g,"");
+            const type = m.media_type || (m.name ? 'tv' : 'movie');
+            return `
+                <div class="${small?'min-w-[100px] h-36':'w-full'} movie-card" onclick="playMedia('${m.id}', '${type}', '${title}', `${desc}`)">
+                    <img loading="lazy" src="${poster}" class="w-full h-full object-cover">
+                </div>
+            `;
+        }
+
+        // Parse: movie name + lang
+        function parseSearchInput(text) {
+            const parts = text.trim().split(/s+/);
+            if(parts.length === 1) {
+                return {query: text.trim(), lang: 'en-US'};
+            }
+            const langWord = parts[parts.length-1].toLowerCase();
+            let langCode = 'en-US';
+
+            if(langWord === 'hindi' || langWord === 'hi') langCode = 'hi-IN';
+            else if(langWord === 'english' || langWord === 'en') langCode = 'en-US';
+            else if(langWord === 'tamil' || langWord === 'ta') langCode = 'ta-IN';
+            else if(langWord === 'telugu' || langWord === 'te') langCode = 'te-IN';
+            else if(langWord === 'kannada' || langWord === 'kn') langCode = 'kn-IN';
+            else if(langWord === 'malayalam' || langWord === 'ml') langCode = 'ml-IN';
+            else langCode = 'en-US';
+
+            const query = parts.slice(0, parts.length-1).join(' ') || text.trim();
+            return {query, lang: langCode};
+        }
+
+        window.globalSearch = async function(preset = '') {
+            const raw = preset || document.getElementById('gSearch').value;
+            if(!raw) return;
+
+            const parsed = parseSearchInput(raw);
+            lastQuery = parsed.query;
+            lastLang = parsed.lang;
+            pg = 1;
+            currentMode = 'search';
+
+            isSearching = true;
+            window.scrollTo(0,0);
+            document.getElementById('gridTitle').innerText = `RESULT: ${raw.toUpperCase()}`;
+            document.getElementById('mainGrid').innerHTML = '<div class="col-span-3 py-20 text-center text-orange-600 font-bold animate-pulse uppercase text-xs">Accessing World Servers...</div>';
+            const d = await api(`/search/multi?query=${encodeURIComponent(parsed.query)}&page=${pg}`, parsed.lang);
+            document.getElementById('mainGrid').innerHTML = (d.results || []).filter(i=>i.poster_path).map(m=>createCard(m)).join('');
+            pg++;
+            isSearching = false;
         };
 
-        window.exitPlayer = () => { document.getElementById('fullPlayer').style.display = 'none'; document.getElementById('iframePro').src = ''; };
-
-        // PWA Install Logic
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-banner').style.display = 'block';
-        });
-
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                document.getElementById('install-banner').style.display = 'none';
+        async function loadMoreSearch() {
+            if(isSearching || !lastQuery) return;
+            isSearching = true;
+            const d = await api(`/search/multi?query=${encodeURIComponent(lastQuery)}&page=${pg}`, lastLang);
+            if(d.results && d.results.length) {
+                document.getElementById('mainGrid').innerHTML += d.results.filter(i=>i.poster_path).map(m=>createCard(m)).join('');
+                pg++;
             }
+            isSearching = false;
+        }
+
+        window.playMedia = function(id, type, title, desc) {
+            triggerAd(() => {
+                saveHistory({id, type, title, poster: ''}); // Save to Watch History
+                document.getElementById('fullPlayer').style.display = 'flex';
+                document.getElementById('pName').innerText = title;
+                document.getElementById('mFullTitle').innerText = title;
+                document.getElementById('mFullDesc').innerText = desc;
+                
+                const svs = [
+                    {n: "SERVER 1", u: `https://vidsrc.to/embed/${type}/${id}`},
+                    {n: "SERVER 2", u: `https://vidsrc.me/embed/${type}/${id}`},
+                    {n: "SERVER 3", u: `https://vidsrc.xyz/embed/${type}/${id}`},
+                    {n: "SERVER 4", u: `https://www.2embed.cc/embed/${type==='movie'?id:'tv?tmdb='+id}`}
+                ];
+
+                document.getElementById('sSelect').innerHTML = svs.map((s)=>`
+                    <button onclick="document.getElementById('iframePro').src='${s.u}'" class="bg-[#1a1d23] px-4 py-2 rounded-lg text-[10px] font-bold whitespace-nowrap">${s.n}</button>
+                `).join('');
+                
+                document.getElementById('iframePro').src = svs[0].u;
+                document.getElementById('dlBtn').onclick = () => window.open(svs[0].u, '_blank');
+            });
+        };
+
+        function saveHistory(item) {
+            let hist = JSON.parse(localStorage.getItem('utv_hist') || '[]');
+            hist = hist.filter(h => h.id !== item.id);
+            hist.unshift(item);
+            localStorage.setItem('utv_hist', JSON.stringify(hist.slice(0,10)));
+        }
+
+        function renderHistory() {
+            const h = JSON.parse(localStorage.getItem('utv_hist') || '[]');
+            if(h.length > 0) {
+                document.getElementById('historySec').classList.remove('hidden');
+                document.getElementById('historyGrid').innerHTML = h.map(m => `
+                    <div class="min-w-[100px] h-36 bg-[#111] rounded-lg overflow-hidden border border-white/5" onclick="playMedia('${m.id}','${m.type}','${m.title}','')">
+                        <div class="h-full flex items-center justify-center text-[8px] text-center p-2 font-bold uppercase">${m.title}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.toggleHistory = () => { renderHistory(); window.scrollTo(0,0); };
+        window.exitPlayer = () => { document.getElementById('fullPlayer').style.display = 'none'; document.getElementById('iframePro').src = ''; };
+    })();
+
+    // -------------------
+    // PWA INSTALL (3D POP)
+    // -------------------
+    let deferredPrompt;
+    const installBanner = document.getElementById('install-banner');
+    const btnInstall = document.getElementById('btn-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.style.display = 'block';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBanner.style.display = 'none';
+            console.log('Install outcome:', outcome);
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        installBanner.style.display = 'none';
+        console.log('PWA installed (U-TV MOVIE HUB)');
+    });
+
+    // -------------------
+    // REGISTER SERVICE WORKER (PWA)
+    // -------------------
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(console.error);
         });
-    </script>
+    }
+</script>
+
 </body>
 </html>
