@@ -10,7 +10,6 @@
 <title>UTV MOVIE HUB</title>
 
 <link rel="canonical" href="https://utv-appp.pages.dev/">
-
 <link rel="manifest" href="manifest.json">
 
 <!-- ADS -->
@@ -180,14 +179,20 @@ Contact: HELP.WOWMOVIES@GMAIL.COM
 <!-- WHATSAPP BUTTON -->
 
 <div style="position:fixed;bottom:120px;right:20px;z-index:99999;">
-
 <a href="https://wa.me/919999999999" target="_blank">
-
-<img src="https://cdn-icons-png.flaticon.com/512/124/124034.png"
-style="width:55px;height:55px;">
-
+<img src="https://cdn-icons-png.flaticon.com/512/124/124034.png" style="width:55px;height:55px;">
 </a>
+</div>
 
+<!-- PWA INSTALL POPUP -->
+
+<div id="pwaBox" style="display:none;position:fixed;inset:0;background:#000000e6;z-index:999999;align-items:center;justify-content:center;">
+<div style="background:#111;padding:25px;border-radius:15px;text-align:center;width:260px;position:relative;">
+<button onclick="closePWA()" style="position:absolute;top:5px;right:10px;background:none;border:none;color:#fff;font-size:22px;">×</button>
+<h3 style="font-weight:bold;">Install UTV Movie Hub</h3>
+<p style="font-size:12px;color:#aaa;margin:10px 0;">Fast streaming ke liye app install kare</p>
+<button id="installBtn" style="background:#ff4f00;padding:10px 20px;border:none;border-radius:30px;color:#fff;font-weight:bold;">INSTALL</button>
+</div>
 </div>
 
 <script>
@@ -273,6 +278,42 @@ document.getElementById('iframePro').src='';
 };
 
 loadMovies(currentPath);
+
+/* SERVICE WORKER */
+
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js');
+}
+
+/* PWA INSTALL */
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt',(e)=>{
+e.preventDefault();
+deferredPrompt=e;
+document.getElementById("pwaBox").style.display="flex";
+});
+
+document.getElementById("installBtn").addEventListener("click",async()=>{
+if(deferredPrompt){
+deferredPrompt.prompt();
+deferredPrompt=null;
+}
+});
+
+function closePWA(){
+document.getElementById("pwaBox").style.display="none";
+}
+
+/* FULLSCREEN AD AFTER INSTALL */
+
+if(window.matchMedia('(display-mode: standalone)').matches){
+if(!localStorage.getItem("pwaAd")){
+window.open("https://www.effectivegatecpm.com/wdq8xfgje?key=f40720aa6a18972fa2442e95e14d67a2","_blank");
+localStorage.setItem("pwaAd","1");
+}
+}
 
 </script>
 
