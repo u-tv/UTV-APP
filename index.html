@@ -6,12 +6,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <meta name="google-site-verification" content="bE-yYjv8UCu0WWA4Ok4Ixp8JaUQWOpE4qx0h93TbwTQ" />
-<title id="pwa-title">UTV MOVIE HUB - Stream Movies & Series</title>
-<meta name="description" content="Watch latest movies and series on UTV Movie Hub. High quality streaming with Hindi and English support.">
-<link rel="canonical" id="meta-canon" href="https://utv-appp.pages.dev/">
+
+<title id="pwa-title">${MOVIE_TITLE}</title>
+<meta name="description" id="meta-desc" content="${MOVIE_DESC}">
+<link rel="canonical" id="meta-canon" href="${CANONICAL_URL}">
+
+<meta property="og:title" content="${MOVIE_TITLE}">
+<meta property="og:description" content="${MOVIE_DESC}">
+<meta property="og:url" content="${CANONICAL_URL}">
 
 <meta name="theme-color" content="#ff4f00">
 <link rel="manifest" href="manifest.json">
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
 <script src="https://pl28902806.effectivegatecpm.com/88/dc/04/88dc046a8dca77b4487afc3ed66fe999.js"></script>
 <script src="https://pl28917208.effectivegatecpm.com/6e/f9/d4/6ef9d4a2f62c3c63e267116b1ec054a7.js"></script>
@@ -174,7 +181,6 @@ const API_KEY='174d0214bf933dd59b3d5ec68a0c967f';
 let currentPage=1;
 let currentPath='/movie/popular';
 
-// FIX: SITEMAP & URL PARAMS SYNC
 const urlParams = new URLSearchParams(window.location.search);
 const movieID = urlParams.get('m') || urlParams.get('id');
 const mediaType = urlParams.get('t') || 'movie';
@@ -203,10 +209,9 @@ if(reset && movies[0]){
     document.getElementById('heroBox').innerHTML=`<img src="https://image.tmdb.org/t/p/w500${movies[0].backdrop_path}" class="w-full h-full object-cover">`;
 }
 
-// AUTO-LOAD FROM URL (Sitemap Indexing)
+// FIX: Auto-Load Movie from URL (Important for SEO indexing)
 if(movieID && currentPage === 1) {
-    const movieData = movies.find(m => m.id == movieID);
-    if(movieData) playMedia(movieData.id, movieData.title?'movie':'tv', (movieData.title||movieData.name), true);
+    playMedia(movieID, mediaType, "Streaming Now...", true);
 }
 
 document.getElementById('mainGrid').innerHTML+=movies.map(m=>`
@@ -239,7 +244,7 @@ window.playMedia=(id,type,title,isAuto=false)=>{
     document.getElementById('pName').innerText=title;
     document.getElementById('iframePro').src=`https://vidsrc.to/embed/${type}/${id}`;
     
-    // Update Title & URL for Google Indexing
+    // SEO Meta Update
     document.getElementById('pwa-title').innerText = title + " - UTV MOVIE HUB";
     if(!isAuto) window.history.pushState({}, '', `?t=${type}&m=${id}`);
 };
